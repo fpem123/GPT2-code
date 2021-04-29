@@ -1,4 +1,4 @@
-FROM python3
+FROM python
 
 RUN apt-get update && \
     apt-get install -y && \
@@ -14,4 +14,4 @@ COPY . .
 
 EXPOSE 80
 
-CMD ["opyrator", "launch-api", "my_opy:Generate_crime_punish", "--port", "80"]
+CMD ["opyrator", "launch-api", "my_opy:generate_crime_punish", "--port", "80"]

@@ -12,7 +12,7 @@ model.to(device)
 ##
 # GPT-2 generator.
 # Make java code!.
-def mk_crime_punish(text, length, how_many, top_p, top_k):
+def mk_crime_punish(text, length, how_many, top_p, top_k, do_sample):
     try:
         input_ids = tokenizer.encode(text, return_tensors='pt')
 
@@ -28,7 +28,7 @@ def mk_crime_punish(text, length, how_many, top_p, top_k):
 
         # model generating
         sample_outputs = model.generate(input_ids, pad_token_id=50256,
-                                        do_sample=True,
+                                        do_sample=do_sample,
                                         max_length=length,
                                         top_p=top_p,
                                         top_k=top_k,
@@ -71,17 +71,21 @@ class Input(BaseModel):
     )
 
     top_k: int = Field(
-        10,
-        ge=1,
-        le=40,
+        50,
+        le=100,
         description="top_k",
     )
 
-    top_p: int = Field(
+    top_p: float = Field(
         0.8,
         ge=0.1,
         le=1.0,
         description="top_p",
+    )
+
+    do_sample: bool = Field(
+        True,
+        description="Whether or not to use sampling ; use greedy decoding otherwise.",
     )
 
 
@@ -89,7 +93,7 @@ class Output(BaseModel):
     message: dict = Field(...)
 
 
-def Generate_crime_punish(input: Input) -> Output:
+def generate_crime_punish(input: Input) -> Output:
     res = mk_crime_punish(
         input.text,
         input.length,
