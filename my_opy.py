@@ -1,8 +1,8 @@
 from pydantic import BaseModel, Field
-from transformers import ReformerModelWithLMHead, ReformerTokenizer
+from transformers import AutoModelForCausalLM, AutoTokenizer
 
-tokenizer = ReformerTokenizer.from_pretrained('google/reformer-crime-and-punishment')
-model = ReformerModelWithLMHead.from_pretrained('google/reformer-crime-and-punishment')
+tokenizer = AutoTokenizer.from_pretrained('google/reformer-crime-and-punishment')
+model = AutoModelForCausalLM.from_pretrained('google/reformer-crime-and-punishment')
 
 
 ##
