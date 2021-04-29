@@ -1,12 +1,8 @@
 from pydantic import BaseModel, Field
-from transformers import AutoModelForCausalLM, AutoTokenizer
-import torch
+from transformers import ReformerModelWithLMHead, ReformerTokenizer
 
-tokenizer = AutoTokenizer.from_pretrained('google/reformer-crime-and-punishment')
-model = AutoModelForCausalLM.from_pretrained('google/reformer-crime-and-punishment')
-
-device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-model.to(device)
+tokenizer = ReformerTokenizer.from_pretrained('google/reformer-crime-and-punishment')
+model = ReformerModelWithLMHead.from_pretrained('google/reformer-crime-and-punishment')
 
 
 ##
@@ -15,9 +11,6 @@ model.to(device)
 def mk_crime_punish(text, length, how_many, top_p, top_k, do_sample):
     try:
         input_ids = tokenizer.encode(text, return_tensors='pt')
-
-        # input_ids also need to apply gpu device!
-        input_ids = input_ids.to(device)
 
         min_length = len(input_ids.tolist()[0])
         length += min_length
