@@ -7,6 +7,7 @@ RUN apt-get update && \
 RUN pip install --upgrade pip
 RUN pip install transformers \
     torch \
+    sentencepiece \
     opyrator
 
 RUN mkdir -p /app
