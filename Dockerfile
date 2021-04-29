@@ -6,7 +6,7 @@ RUN apt-get update && \
 
 RUN pip install --upgrade pip
 RUN pip install transformers \
-    flask
+    opyrator
 
 RUN mkdir -p /app
 WORKDIR /app
@@ -14,4 +14,4 @@ COPY . .
 
 EXPOSE 80
 
-CMD ["python3", "app.py"]
+CMD ["opyrator", "launch-api", "my_opy:Generate_crime_punish", "--port", "80"]

@@ -1,4 +1,4 @@
-from transformers import ReformerModelWithLMHead, ReformerTokenizer
+from transformers import AutoModelForCausalLM, AutoTokenizer
 from flask import Flask, request, jsonify, render_template
 import torch
 
@@ -7,12 +7,12 @@ from threading import Thread
 import time
 import os
 
-os.environ['KMP_DUPLICATE_LIB_OK']='True'
+os.environ['KMP_DUPLICATE_LIB_OK'] = 'True'
 
 app = Flask(__name__)
 
-tokenizer = ReformerModelWithLMHead.from_pretrained('google/reformer-crime-and-punishment')
-model = ReformerTokenizer.from_pretrained('google/reformer-crime-and-punishment')
+tokenizer = AutoTokenizer.from_pretrained('google/reformer-crime-and-punishment')
+model = AutoModelForCausalLM.from_pretrained('google/reformer-crime-and-punishment')
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 model.to(device)
@@ -43,6 +43,7 @@ def handle_requests_by_batch():
 
 
 Thread(target=handle_requests_by_batch).start()
+
 
 ##
 # GPT-2 generator.
