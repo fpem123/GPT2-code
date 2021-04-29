@@ -52,17 +52,10 @@
 
         const length = document.getElementById("length").value;
         const howmany = document.getElementById("howmany").value;
-        let types_radio = document.getElementsByName("types");
-        let types = 'python';
 
-        for (var i=0; i<types_radio.length; i++) {
-            if (types_radio[i].checked == true) {
-                types = types_radio[i].value;
-            }
-        }
 
         const formData = new FormData();
-        const url = `/${types}`;
+        const url = `/gen`;
         let start = 0;
 
         formData.append('text', text);
@@ -86,8 +79,6 @@
             flag = false;
             document.getElementById('warning').innerText = err;
         }).then(data => {
-            data = data[0];
-
             const table = document.getElementById('generated');
 
             // 기존 내용 삭제
@@ -95,23 +86,19 @@
                 table.removeChild(table.lastChild);
             }
 
-            for (i in data) {
+             for (i in data) {
                 const row = table.insertRow();
-                const name = row.insertCell(0);
+                const idx = row.insertCell(0);
                 const text = row.insertCell(1);
 
-                name.style.width = "20%";
-                text.style.width = '70%';
+                idx.style.width = "10%";
+                text.style.width = '80%';
                 text.style.height = '60pt';
 
+                idx.innerHTML = i;
+                text.innerHTML = data[i];
 
-                if (chars.includes(data[i][0])) {
-                    name.innerHTML = `<td class="name"><center><img src="../static/${data[i][0]}.png" width="50" height="70"><br>${data[i][0]}</center></td>`;
-                } else {
-                    name.innerHTML = `<td class="name"><center><br>${data[i][0]}</center></td>`;
-                }
-
-                text.innerHTML = data[i][1];
+                console.log(data[i]);
             }
 
             clearInterval(timer);
@@ -156,11 +143,8 @@
             <div class="intro">
                 <br>
                 <!-- Project title -->
-                <h1>GPT-2 Futurama</h1><br>
-                <a>Generate Futurama script using GPT-2 model.</a><br><br>
-                <a>Git hub repository : </a> <a href="https://github.com/fpem123/GPT2-Futurama" target="_blank">GPT-2 Futurama</a><br>
-                <a>Open API : </a> <a href="https://ainize.ai/fpem123/GPT2-Futurama?branch=master" target="_blank">On Ainize</a><br>
-                <a>Fine tuning data : </a><a href="https://www.kaggle.com/josephvm/futurama-seasons-16-transcripts?select=only_spoken_text.csv" target="_blank">Kaggle</a><br><br>
+                <h1>GPT-2 crime and punishment</h1><br>
+                <a>Generate crime and punishment using GPT-2 model.</a><br><br>
             </div>
 
             <hr width="90%">
@@ -168,7 +152,6 @@
             <div class="Notice">
                 <h3>Notice</h3>
                 <ul>
-                    <li>In this demo, the text length is fixed at 150.</li>
                     <li>The last line can be cut off in the middle.</li>
                 </ul>
             </div>
@@ -178,7 +161,7 @@
             <div class="sample">
                 <h3><label>Example</label></h3>
                 <h5><label>Input</label></h5>
-                <label>&nbsp;&nbsp;Character: Philip J. Fry<br>&nbsp;&nbsp;Text: Hello everyone</label><br><br>
+                <label>&nbsp;&nbsp;Base text: <br></label><br><br>
                 <h5><label>Script</label></h5>
                 <img src="../static/Sample.png" width="100%">
             </div>
@@ -187,7 +170,7 @@
 
             <div class="generate">
                 <h3>Try it!</h3><br>
-                <label>Base code: </label>
+                <label>Base text: </label>
                 <input type="text" id="text" style="width:40%"><br>
                 <label>length: </label>
                 <select id="length" style="width:60pt">
@@ -203,11 +186,7 @@
                     <option value="3">3</option>
                     <option value="4">4</option>
                     <option value="5">5</option>
-                </select>
-                <label> Type:
-                    <input type="radio" name="types" value="python" checked> python
-                    <input type="radio" name="types" value="java"> java
-                </label><br>
+                </select><br>
                 <button class="btn btn-primary btn=lg" type="submit" id="button" onclick="send_req();">submit</button><br>
                 <b><label id="warning" style="color:red;"></label></b>
             </div>

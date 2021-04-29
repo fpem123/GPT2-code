@@ -1,22 +1,21 @@
-from transformers import AutoModelForCausalLM, AutoTokenizer
+from transformers import ReformerModelWithLMHead, ReformerTokenizer
 from flask import Flask, request, jsonify, render_template
 import torch
 
 from queue import Queue, Empty
 from threading import Thread
 import time
+import os
+
+os.environ['KMP_DUPLICATE_LIB_OK']='True'
 
 app = Flask(__name__)
 
-tokenizer_java = AutoTokenizer.from_pretrained('microsoft/CodeGPT-small-java')
-model_java = AutoModelForCausalLM.from_pretrained('microsoft/CodeGPT-small-java')
-
-tokenizer_py = AutoTokenizer.from_pretrained('microsoft/CodeGPT-small-py')
-model_py = AutoModelForCausalLM.from_pretrained('microsoft/CodeGPT-small-py')
+tokenizer = ReformerModelWithLMHead.from_pretrained('google/reformer-crime-and-punishment')
+model = ReformerTokenizer.from_pretrained('google/reformer-crime-and-punishment')
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-model_java.to(device)
-model_py.to(device)
+model.to(device)
 
 requests_queue = Queue()    # request queue.
 BATCH_SIZE = 1              # max request size.
@@ -38,23 +37,19 @@ def handle_requests_by_batch():
 
             for requests in request_batch:
                 try:
-                    code_type = requests['input'].pop(0)
-                    if code_type == 'python':
-                        requests["output"] = mk_python_code(requests['input'][0], requests['input'][1], requests['input'][2])
-                    elif code_type == 'java':
-                        requests["output"] = mk_java_code(requests['input'][0], requests['input'][1], requests['input'][2])
+                    requests["output"] = mk_crim_punish(requests['input'][0], requests['input'][1], requests['input'][2])
                 except:
                     requests["output"] = 'error :('
 
-handler = Thread(target=handle_requests_by_batch).start()
 
+Thread(target=handle_requests_by_batch).start()
 
 ##
 # GPT-2 generator.
 # Make java code!.
-def mk_java_code(text, length, how_many):
+def mk_crim_punish(text, length, how_many):
     try:
-        input_ids = tokenizer_java.encode(text, return_tensors='pt')
+        input_ids = tokenizer.encode(text, return_tensors='pt')
 
         # input_ids also need to apply gpu device!
         input_ids = input_ids.to(device)
@@ -65,56 +60,19 @@ def mk_java_code(text, length, how_many):
         length = length if length > 0 else 1
 
         # model generating
-        sample_outputs = model_java.generate(input_ids, pad_token_id=50256,
-                                             do_sample=True,
-                                             max_length=length,
-                                             min_length=min_length,
-                                             top_p=0.80,
-                                             top_k=40,
-                                             num_return_sequences=how_many)
+        sample_outputs = model.generate(input_ids, pad_token_id=50256,
+                                        do_sample=True,
+                                        max_length=length,
+                                        top_p=0.80,
+                                        top_k=40,
+                                        num_return_sequences=how_many)
 
         result = dict()
 
         for idx, sample_output in enumerate(sample_outputs):
-            java_code = tokenizer_java.decode(sample_output, skip_special_tokens=True)
-            result[idx] = java_code
-
-        return result
-
-    except Exception as e:
-        print('Error occur in java code generating!', e)
-        return jsonify({'error': e}), 500
-
-
-##
-# GPT-2 generator.
-# Make java code!.
-def mk_python_code(text, length, how_many):
-    try:
-        input_ids = tokenizer_py.encode(text, return_tensors='pt')
-
-        # input_ids also need to apply gpu device!
-        input_ids = input_ids.to(device)
-
-        min_length = len(input_ids.tolist()[0])
-        length += min_length
-
-        length = length if length > 0 else 1
-
-        # model generating
-        sample_outputs = model_py.generate(input_ids, pad_token_id=50256,
-                                           do_sample=True,
-                                           max_length=length,
-                                           min_length=min_length,
-                                           top_p=0.80,
-                                           top_k=40,
-                                           num_return_sequences=how_many)
-
-        result = dict()
-
-        for idx, sample_output in enumerate(sample_outputs):
-            python_code = tokenizer_py.decode(sample_output, skip_special_tokens=True)
-            result[idx] = python_code
+            story = tokenizer.decode(sample_output, skip_special_tokens=True)
+            print(story)
+            result[idx] = story
 
         return result
 
@@ -125,8 +83,8 @@ def mk_python_code(text, length, how_many):
 
 ##
 # Get post request page.
-@app.route('/<types>', methods=['POST'])
-def generate(types):
+@app.route('/gen', methods=['POST'])
+def generate():
     # GPU app can process only one request in one time.
     if requests_queue.qsize() > BATCH_SIZE:
         return jsonify({'Error': 'Too Many Requests'}), 429
@@ -138,8 +96,6 @@ def generate(types):
         length = int(request.form['length'])
         how_many = int(request.form['howmany'])
 
-
-        args.append(types)
         args.append(text)
         args.append(length)
         args.append(how_many)
