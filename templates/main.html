@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title><!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <title>GPT-2 Futurama script</title>
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
+        integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+</head>
+<script type="text/javascript">
+    let time_obj = undefined;
+    let flag = undefined;
+    let chars = undefined;
+
+    window.onload = () => {
+        time_obj = document.getElementById("timer");
+        flag = false;
+        chars = ["Fry", "Leela", "Bender", "Farnsworth", "Zoidberg", "Wong", "Conrad", "Scruffington"];
+    }
+
+    function double_submit_check() {
+        if (flag) {
+            console.log("double");
+            return true;
+        }
+        else {
+            flag = true;
+
+            return false;
+        }
+    }
+
+    function send_req() {
+        if (double_submit_check()){
+            return ;
+        }
+
+        const text = document.getElementById("text").value;
+
+        if (text == '') {
+            document.getElementById('warning').innerText = 'Please fill base code!';
+            flag = false;
+            return ;
+        }
+
+        const length = document.getElementById("length").value;
+        const howmany = document.getElementById("howmany").value;
+        let types_radio = document.getElementsByName("types");
+        let types = 'python';
+
+        for (var i=0; i<types_radio.length; i++) {
+            if (types_radio[i].checked == true) {
+                types = types_radio[i].value;
+            }
+        }
+
+        const formData = new FormData();
+        const url = `/${types}`;
+        let start = 0;
+
+        formData.append('text', text);
+        formData.append('length', length);
+        formData.append('howmany', howmany);
+
+        timer = setInterval(() => {
+            start += 1;
+            time_obj.innerText = `${start / 10} 's`;
+        }, 100);
+
+        fetch (url, { method: 'POST', body: formData, })
+        .then(response => {
+            if (response.status === 200) {
+                return response.json();
+            } else {
+                clearInterval(timer);
+            }
+        }).catch(err => {
+            clearInterval(timer);
+            flag = false;
+            document.getElementById('warning').innerText = err;
+        }).then(data => {
+            data = data[0];
+
+            const table = document.getElementById('generated');
+
+            // 기존 내용 삭제
+            while (table.hasChildNodes()) {
+                table.removeChild(table.lastChild);
+            }
+
+            for (i in data) {
+                const row = table.insertRow();
+                const name = row.insertCell(0);
+                const text = row.insertCell(1);
+
+                name.style.width = "20%";
+                text.style.width = '70%';
+                text.style.height = '60pt';
+
+
+                if (chars.includes(data[i][0])) {
+                    name.innerHTML = `<td class="name"><center><img src="../static/${data[i][0]}.png" width="50" height="70"><br>${data[i][0]}</center></td>`;
+                } else {
+                    name.innerHTML = `<td class="name"><center><br>${data[i][0]}</center></td>`;
+                }
+
+                text.innerHTML = data[i][1];
+            }
+
+            clearInterval(timer);
+            time_obj.innerText = 'Done!';
+            flag = false;
+        }).catch(err => {
+            clearInterval(timer);
+            flag = false;
+            document.getElementById('warning').innerText = err;
+        });
+    }
+
+</script>
+<body>
+    <div class="styles">
+        <style>
+                #button{
+                    border-top-left-radius: 5pt;
+                    border-top-right-radius: 5pt;
+                    border-bottom-left-radius: 5pt;
+                    border-bottom-right-radius: 5pt;
+                }
+
+                #length, #howmany{
+                    width: 70px;
+                    height: 30px;
+                    border-top-left-radius: 5pt;
+                    border-top-right-radius: 5pt;
+                    border-bottom-left-radius: 5pt;
+                    border-bottom-right-radius: 5pt;
+                }
+
+                table {
+                  border-spacing: 10px;
+                  border-collapse: separate;
+                }
+
+        </style>
+    </div>
+    <div class="container">
+        <div class="jumbotron mt-3">
+            <div class="intro">
+                <br>
+                <!-- Project title -->
+                <h1>GPT-2 Futurama</h1><br>
+                <a>Generate Futurama script using GPT-2 model.</a><br><br>
+                <a>Git hub repository : </a> <a href="https://github.com/fpem123/GPT2-Futurama" target="_blank">GPT-2 Futurama</a><br>
+                <a>Open API : </a> <a href="https://ainize.ai/fpem123/GPT2-Futurama?branch=master" target="_blank">On Ainize</a><br>
+                <a>Fine tuning data : </a><a href="https://www.kaggle.com/josephvm/futurama-seasons-16-transcripts?select=only_spoken_text.csv" target="_blank">Kaggle</a><br><br>
+            </div>
+
+            <hr width="90%">
+
+            <div class="Notice">
+                <h3>Notice</h3>
+                <ul>
+                    <li>In this demo, the text length is fixed at 150.</li>
+                    <li>The last line can be cut off in the middle.</li>
+                </ul>
+            </div>
+
+            <br><hr width="90%">
+
+            <div class="sample">
+                <h3><label>Example</label></h3>
+                <h5><label>Input</label></h5>
+                <label>&nbsp;&nbsp;Character: Philip J. Fry<br>&nbsp;&nbsp;Text: Hello everyone</label><br><br>
+                <h5><label>Script</label></h5>
+                <img src="../static/Sample.png" width="100%">
+            </div>
+
+            <br><hr width="90%">
+
+            <div class="generate">
+                <h3>Try it!</h3><br>
+                <label>Base code: </label>
+                <input type="text" id="text" style="width:40%"><br>
+                <label>length: </label>
+                <select id="length" style="width:60pt">
+                    <option value="50">50</option>
+                    <option value="100">100</option>
+                    <option value="150">150</option>
+                    <option value="200">200</option>
+                </select>
+                <label>How many: </label>
+                <select id="howmany" style="width:30pt">
+                    <option value="1">1</option>
+                    <option value="2">2</option>
+                    <option value="3">3</option>
+                    <option value="4">4</option>
+                    <option value="5">5</option>
+                </select>
+                <label> Type:
+                    <input type="radio" name="types" value="python" checked> python
+                    <input type="radio" name="types" value="java"> java
+                </label><br>
+                <button class="btn btn-primary btn=lg" type="submit" id="button" onclick="send_req();">submit</button><br>
+                <b><label id="warning" style="color:red;"></label></b>
+            </div>
+
+            <br><hr width="90%">
+
+            <div class="result">
+                <h3><label>Result</label>&nbsp;&nbsp;&nbsp;<label id="timer"></label></h3>
+                <h5><label>Script</label></h5>
+                <!-- Generate result table -->
+                <table id="generated" width="100%"></table>
+            </div>
+
+            <br><hr width="50%">
+        </div>
+    </div>
+</body>
+</html>
