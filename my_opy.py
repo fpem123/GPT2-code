@@ -92,7 +92,8 @@ def generate_crime_punish(input: Input) -> Output:
         input.length,
         input.how_many,
         input.top_p,
-        input.top_k
+        input.top_k,
+        input.do_sample
     )
 
     return Output(message=res)
