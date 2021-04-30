@@ -16,4 +16,4 @@ COPY . .
 
 EXPOSE 80
 
-CMD ["opyrator", "launch-api", "my_opy:generate_crime_punish", "--port", "80"]
+CMD ["opyrator", "launch-ui", "my_opy:generate_crime_punish", "--port", "80"]
