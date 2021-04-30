@@ -1,8 +1,8 @@
 from pydantic import BaseModel, Field
-from transformers import AutoModelForCausalLM, AutoTokenizer
+from transformers import ReformerModelWithLMHead, ReformerTokenizer
 
-tokenizer = AutoTokenizer.from_pretrained('google/reformer-crime-and-punishment')
-model = AutoModelForCausalLM.from_pretrained('google/reformer-crime-and-punishment')
+tokenizer = ReformerTokenizer.from_pretrained('google/reformer-crime-and-punishment')
+model = ReformerModelWithLMHead.from_pretrained('google/reformer-crime-and-punishment')
 
 
 ##
@@ -51,8 +51,8 @@ class Input(BaseModel):
 
     length: int = Field(
         30,
-        ge=5,
-        le=500,
+        ge=1,
+        le=200,
         description="The maximum length of the sequence to be generated.",
     )
 
@@ -65,6 +65,7 @@ class Input(BaseModel):
 
     top_k: int = Field(
         50,
+        ge=1,
         le=100,
         description="top_k",
     )
